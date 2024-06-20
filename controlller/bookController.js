@@ -5,14 +5,12 @@ const GetBook = async (req, res) => {
     try {
         let query = {};
         if (req.query.genre) {
-            query.genre = req.query.genre;
+            // Use regex to match the genre exactly within the comma-separated string
+            query.genre = { $regex: new RegExp(`\\b${req.query.genre}\\b`, "i") };
         }
 
         let sortCriteria = {};
-
-     
-        if (req.query.sort == 'price') {
-           
+        if (req.query.sort === 'price') {
             sortCriteria.price = req.query.order === '0' ? -1 : 1; 
         }
 
