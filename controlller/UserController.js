@@ -49,18 +49,22 @@ const userLogin  = async (req, res) => {
     }
 }
 
-const userLogout = async(req,res)=>{
-    const token = req.headers.authorization?.split(" ")[1]
+const userLogout = async(req, res) => {
+    const token = req.headers.authorization?.split(" ")[1];
     try {
         if (token) {
-            await blacklistModel.create({ blacklist: [token] })
-
+            // Check if the token is already blacklisted
+            const tokenInBlacklist = await BlackListModel.findOne({ token });
+            if (!tokenInBlacklist) {
+                // If the token is not blacklisted, add it to the blacklist
+                await BlackListModel.create({ token });
+            }
         }
-        res.status(200).send({ "msg": "User has been logged out" })
+        res.status(200).send({ msg: "User has been logged out" });
     } catch (error) {
-        res.status(400).send({ 'err': error.message })
+        res.status(400).send({ err: error.message });
     }
-}
+};
 
 module.exports = {
     userRegister,
