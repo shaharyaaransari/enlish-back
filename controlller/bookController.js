@@ -3,28 +3,37 @@ const BookModels = require("../models/bookModel")
 
 const GetBook = async (req, res) => {
     try {
-        let query = {};
-        if (req.query.genre) {
-            // Use regex to match the genre exactly within the comma-separated string
-            query.genre = { $regex: new RegExp(`\\b${req.query.genre}\\b`, "i") };
-        }
-
-        let sortCriteria = {};
-        if (req.query.sort === 'price') {
-            sortCriteria.price = req.query.order === '0' ? -1 : 1; 
-        }
-
-        const books = await BookModels.find(query).sort(sortCriteria);
-
-        if (books.length === 0) {
-            return res.status(404).send({ "msg": "Books not found" });
-        }
-        
-        res.status(200).send(books);
+      let query = {};
+  
+      // Filter by genre
+      if (req.query.genre) {
+        query.genre = { $regex: new RegExp(`\\b${req.query.genre}\\b`, "i") };
+      }
+  
+      // Filter by title
+      if (req.query.title) {
+        query.title = { $regex: req.query.title, $options: 'i' }; // Case-insensitive partial match
+      }
+  
+      // Sorting criteria
+      let sortCriteria = {};
+      if (req.query.sort === 'price') {
+        sortCriteria.price = req.query.order === '0' ? -1 : 1; 
+      }
+  
+      // Fetch books from the database
+      const books = await BookModels.find(query).sort(sortCriteria);
+  
+      if (books.length === 0) {
+        return res.status(404).send({ "msg": "Books not found" });
+      }
+      
+      res.status(200).send(books);
     } catch (error) {
-        res.status(400).send({ "err": error.message });
+      res.status(400).send({ "err": error.message });
     }
-};
+  };
+  
 
 
   const AddBook =async (req, res) => {
